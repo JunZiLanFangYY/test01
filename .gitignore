@@ -10,3 +10,8 @@ dist-ssr
 .vscode/*
 !.vscode/extensions.json
 *.log
+# TS incremental build cache
+*.tsbuildinfo
+# vite.config 编译产物（仅源码 vite.config.ts 入仓）
+vite.config.js
+vite.config.d.ts
