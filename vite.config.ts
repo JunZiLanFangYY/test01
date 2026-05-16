@@ -4,6 +4,7 @@ import path from "node:path";
 import { visualizer } from "rollup-plugin-visualizer";
 
 export default defineConfig({
+  base: process.env.VITE_BASE ?? "/test01/",
   plugins: [
     react(),
     process.env.ANALYZE === "true" &&
