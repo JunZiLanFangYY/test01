@@ -1,0 +1,7 @@
+node_modules
+dist
+tsconfig.tsbuildinfo
+图集资料
+.DS_Store
+*.local
+.vscode

@@ -1,0 +1,434 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>RebarVis 3D - Structural Dashboard</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "surface-container-lowest": "#010f1f",
+                        "outline-variant": "#424754",
+                        "tertiary-container": "#8990a8",
+                        "on-secondary": "#263143",
+                        "secondary-fixed-dim": "#bcc7de",
+                        "on-error": "#690005",
+                        "inverse-surface": "#d4e4fa",
+                        "on-primary-fixed-variant": "#004395",
+                        "inverse-on-surface": "#233143",
+                        "on-tertiary-container": "#22293d",
+                        "surface-container": "#122131",
+                        "surface": "#051424",
+                        "primary": "#adc6ff",
+                        "surface-dim": "#051424",
+                        "on-background": "#d4e4fa",
+                        "on-tertiary-fixed-variant": "#3f465c",
+                        "on-surface-variant": "#c2c6d6",
+                        "inverse-primary": "#005ac2",
+                        "background": "#051424",
+                        "tertiary-fixed-dim": "#bec6e0",
+                        "on-surface": "#d4e4fa",
+                        "on-primary-container": "#00285d",
+                        "primary-fixed-dim": "#adc6ff",
+                        "tertiary-fixed": "#dae2fd",
+                        "surface-tint": "#adc6ff",
+                        "surface-container-high": "#1c2b3c",
+                        "error": "#ffb4ab",
+                        "primary-fixed": "#d8e2ff",
+                        "on-secondary-container": "#aeb9d0",
+                        "on-primary": "#002e6a",
+                        "surface-bright": "#2c3a4c",
+                        "on-secondary-fixed-variant": "#3c475a",
+                        "secondary-container": "#3e495d",
+                        "on-tertiary": "#283044",
+                        "on-secondary-fixed": "#111c2d",
+                        "secondary-fixed": "#d8e3fb",
+                        "primary-container": "#4d8eff",
+                        "surface-container-low": "#0d1c2d",
+                        "tertiary": "#bec6e0",
+                        "secondary": "#bcc7de",
+                        "surface-variant": "#273647",
+                        "on-tertiary-fixed": "#131b2e",
+                        "on-primary-fixed": "#001a42",
+                        "outline": "#8c909f",
+                        "error-container": "#93000a",
+                        "surface-container-highest": "#273647",
+                        "on-error-container": "#ffdad6"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.125rem",
+                        "lg": "0.25rem",
+                        "xl": "0.5rem",
+                        "full": "0.75rem"
+                    },
+                    "spacing": {
+                        "panel-gap": "0.75rem",
+                        "gutter": "1rem",
+                        "unit": "4px",
+                        "container-padding": "1.5rem",
+                        "compact-padding": "0.5rem"
+                    },
+                    "fontFamily": {
+                        "label-md": ["Inter"],
+                        "body-lg": ["Inter"],
+                        "headline-lg": ["Inter"],
+                        "headline-md": ["Inter"],
+                        "body-md": ["Inter"],
+                        "label-sm": ["Inter"]
+                    },
+                    "fontSize": {
+                        "label-md": ["12px", { "lineHeight": "16px", "letterSpacing": "0.02em", "fontWeight": "500" }],
+                        "body-lg": ["16px", { "lineHeight": "24px", "fontWeight": "400" }],
+                        "headline-lg": ["24px", { "lineHeight": "32px", "letterSpacing": "-0.02em", "fontWeight": "600" }],
+                        "headline-md": ["18px", { "lineHeight": "24px", "letterSpacing": "-0.01em", "fontWeight": "600" }],
+                        "body-md": ["14px", { "lineHeight": "20px", "fontWeight": "400" }],
+                        "label-sm": ["10px", { "lineHeight": "12px", "letterSpacing": "0.05em", "fontWeight": "700" }]
+                    }
+                }
+            }
+        }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        /* Custom scrollbar for high density data tables */
+        ::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
+        }
+        ::-webkit-scrollbar-track {
+            background: transparent;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: rgba(140, 144, 159, 0.3);
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: rgba(140, 144, 159, 0.5);
+        }
+    </style>
+</head>
+<body class="bg-surface-container-lowest text-on-surface h-screen overflow-hidden flex flex-col font-body-md antialiased selection:bg-primary-container selection:text-on-primary-container">
+<!-- TopNavBar -->
+<header class="fixed top-0 left-0 w-full z-50 flex justify-between items-center px-gutter h-16 bg-surface-container/80 dark:bg-surface-container/80 backdrop-blur-xl border-b border-outline-variant/20">
+<!-- Brand & Search -->
+<div class="flex items-center gap-container-padding">
+<h1 class="font-headline-md text-headline-md font-bold text-primary tracking-tight flex items-center gap-2">
+<span class="material-symbols-outlined" data-weight="fill" style="font-variation-settings: 'FILL' 1;">architecture</span>
+                RebarVis 3D
+            </h1>
+<div class="relative hidden md:block">
+<span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-outline-variant text-[18px]">search</span>
+<input class="bg-surface-dim border border-outline-variant/30 rounded-full py-1.5 pl-9 pr-4 font-body-md text-body-md text-on-surface placeholder:text-outline focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary w-64 transition-colors" placeholder="Search parameters, IDs..." type="text"/>
+</div>
+</div>
+<!-- Trailing Actions -->
+<div class="flex items-center gap-2">
+<button aria-label="layers" class="p-2 text-on-surface-variant hover:bg-primary/10 hover:text-primary transition-colors rounded-full scale-95 active:scale-90 transition-transform flex items-center justify-center group">
+<span class="material-symbols-outlined group-hover:hidden">layers</span>
+<span class="material-symbols-outlined hidden group-hover:block" data-weight="fill" style="font-variation-settings: 'FILL' 1;">layers</span>
+</button>
+<button aria-label="download" class="p-2 text-on-surface-variant hover:bg-primary/10 hover:text-primary transition-colors rounded-full scale-95 active:scale-90 transition-transform flex items-center justify-center group">
+<span class="material-symbols-outlined group-hover:hidden">download</span>
+<span class="material-symbols-outlined hidden group-hover:block" data-weight="fill" style="font-variation-settings: 'FILL' 1;">download</span>
+</button>
+<button aria-label="share" class="p-2 text-on-surface-variant hover:bg-primary/10 hover:text-primary transition-colors rounded-full scale-95 active:scale-90 transition-transform flex items-center justify-center group">
+<span class="material-symbols-outlined group-hover:hidden">share</span>
+<span class="material-symbols-outlined hidden group-hover:block" data-weight="fill" style="font-variation-settings: 'FILL' 1;">share</span>
+</button>
+<button aria-label="settings" class="p-2 text-on-surface-variant hover:bg-primary/10 hover:text-primary transition-colors rounded-full scale-95 active:scale-90 transition-transform flex items-center justify-center group">
+<span class="material-symbols-outlined group-hover:hidden">settings</span>
+<span class="material-symbols-outlined hidden group-hover:block" data-weight="fill" style="font-variation-settings: 'FILL' 1;">settings</span>
+</button>
+<div class="ml-4 h-8 w-8 rounded-full border border-outline-variant/30 overflow-hidden ml-2 flex items-center justify-center bg-surface-variant">
+<span class="material-symbols-outlined text-on-surface-variant" data-weight="fill" style="font-variation-settings: 'FILL' 1;">person</span>
+</div>
+</div>
+</header>
+<!-- Main Content Area -->
+<div class="flex-1 flex w-full h-[calc(100vh-64px)] mt-16 relative">
+<!-- Left SideNavBar (Module Navigation) -->
+<nav class="fixed left-0 top-16 h-[calc(100vh-64px)] w-64 z-40 flex flex-col py-panel-gap bg-surface-container-low/90 dark:bg-surface-container-low/90 backdrop-blur-lg border-r border-outline-variant/20">
+<!-- Header -->
+<div class="px-gutter mb-6 flex items-center gap-3">
+<div class="w-10 h-10 rounded bg-primary-container/20 flex items-center justify-center border border-primary/30">
+<span class="material-symbols-outlined text-primary" data-weight="fill" style="font-variation-settings: 'FILL' 1;">apartment</span>
+</div>
+<div>
+<h2 class="font-headline-md text-headline-md font-bold text-on-surface leading-tight">Project Alpha</h2>
+<p class="font-label-md text-label-md text-on-surface-variant">Structural Phase 1</p>
+</div>
+</div>
+<!-- CTA -->
+<div class="px-gutter mb-6">
+<button class="w-full flex items-center justify-center gap-2 bg-primary/10 border border-primary/30 hover:bg-primary/20 text-primary font-label-md text-label-md py-2 rounded transition-colors duration-200">
+<span class="material-symbols-outlined text-[16px]">add</span>
+                    New Module
+                </button>
+</div>
+<!-- Tabs -->
+<div class="flex-1 flex flex-col gap-1 px-compact-padding overflow-y-auto">
+<button class="w-full flex items-center gap-3 px-3 py-2 rounded text-left text-on-surface-variant hover:bg-surface-variant/50 hover:text-on-surface transition-all duration-200 group">
+<span class="material-symbols-outlined group-hover:translate-x-1 duration-300">reorder</span>
+<span class="font-label-md text-label-md">Beams</span>
+</button>
+<button class="w-full flex items-center gap-3 px-3 py-2 rounded text-left text-on-surface-variant hover:bg-surface-variant/50 hover:text-on-surface transition-all duration-200 group">
+<span class="material-symbols-outlined group-hover:translate-x-1 duration-300">view_quilt</span>
+<span class="font-label-md text-label-md">Walls</span>
+</button>
+<button class="w-full flex items-center gap-3 px-3 py-2 rounded text-left bg-primary-container/20 text-primary border-r-2 border-primary transition-all duration-200 group">
+<span class="material-symbols-outlined translate-x-1" data-weight="fill" style="font-variation-settings: 'FILL' 1;">view_column</span>
+<span class="font-label-md text-label-md font-bold">Columns</span>
+</button>
+<button class="w-full flex items-center gap-3 px-3 py-2 rounded text-left text-on-surface-variant hover:bg-surface-variant/50 hover:text-on-surface transition-all duration-200 group">
+<span class="material-symbols-outlined group-hover:translate-x-1 duration-300">stairs</span>
+<span class="font-label-md text-label-md">Stairs</span>
+</button>
+</div>
+<!-- Footer Tabs -->
+<div class="mt-auto px-compact-padding pt-4 border-t border-outline-variant/10 flex flex-col gap-1">
+<button class="w-full flex items-center gap-3 px-3 py-2 rounded text-left text-on-surface-variant hover:bg-surface-variant/50 hover:text-on-surface transition-all duration-200 group">
+<span class="material-symbols-outlined text-[18px]">help</span>
+<span class="font-label-md text-label-md">Support</span>
+</button>
+<button class="w-full flex items-center gap-3 px-3 py-2 rounded text-left text-on-surface-variant hover:bg-surface-variant/50 hover:text-on-surface transition-all duration-200 group">
+<span class="material-symbols-outlined text-[18px]">smart_toy</span>
+<span class="font-label-md text-label-md">AI Copilot</span>
+</button>
+</div>
+</nav>
+<!-- Center Canvas Area -->
+<main class="flex-1 ml-64 mr-80 flex flex-col h-full bg-surface-container relative">
+<!-- 3D Viewport (Top) -->
+<div class="flex-[1.5] relative overflow-hidden bg-surface-dim group">
+<!-- Subtle Grid Background -->
+<div class="absolute inset-0 bg-[linear-gradient(to_right,#42475410_1px,transparent_1px),linear-gradient(to_bottom,#42475410_1px,transparent_1px)] bg-[size:40px_40px] pointer-events-none"></div>
+<!-- 3D Canvas Image Placeholder -->
+<div class="absolute inset-0 w-full h-full bg-surface-container-highest/30 bg-cover bg-center" data-alt="A highly realistic 3D technical rendering of a complex reinforced concrete column intersection against a dark, minimalist charcoal background. The rebar structure is highlighted in a subtle electric blue wireframe style, contrasting with the dark solid concrete volumes. High-contrast, precise industrial lighting creates sharp, clean edges, emphasizing the structural engineering complexity and professional BIM software aesthetic. No soft glows or extraneous elements, just pure technical precision in a dark mode environment.">
+</div>
+<!-- Minimalist Canvas Controls HUD -->
+<div class="absolute top-4 right-4 flex flex-col gap-2 opacity-60 hover:opacity-100 transition-opacity">
+<div class="bg-surface-container-highest border border-outline-variant/30 rounded flex flex-col backdrop-blur-md">
+<button class="p-2 hover:bg-surface-variant text-on-surface-variant hover:text-on-surface transition-colors" title="Zoom In"><span class="material-symbols-outlined text-[18px]">add</span></button>
+<div class="h-px w-full bg-outline-variant/30"></div>
+<button class="p-2 hover:bg-surface-variant text-on-surface-variant hover:text-on-surface transition-colors" title="Zoom Out"><span class="material-symbols-outlined text-[18px]">remove</span></button>
+<div class="h-px w-full bg-outline-variant/30"></div>
+<button class="p-2 hover:bg-surface-variant text-on-surface-variant hover:text-on-surface transition-colors" title="Reset View"><span class="material-symbols-outlined text-[18px]">fit_screen</span></button>
+</div>
+<div class="bg-surface-container-highest border border-outline-variant/30 rounded p-2 backdrop-blur-md cursor-pointer hover:bg-surface-variant transition-colors" title="View Options">
+<span class="material-symbols-outlined text-on-surface-variant text-[18px] block">visibility</span>
+</div>
+</div>
+<!-- Object ID Overlay -->
+<div class="absolute bottom-4 left-4 bg-surface-container-lowest/80 border border-outline-variant/50 backdrop-blur-md px-3 py-1.5 rounded flex items-center gap-2">
+<div class="w-2 h-2 rounded-full bg-primary animate-pulse"></div>
+<span class="font-label-sm text-label-sm text-on-surface uppercase tracking-wider">Col-A4 • Level 2</span>
+</div>
+</div>
+<!-- Bottom Data Panel (2D & Quantities) -->
+<div class="flex-[1] flex border-t border-outline-variant/30 bg-surface-container-lowest overflow-hidden">
+<!-- 2D Section View -->
+<div class="w-2/5 border-r border-outline-variant/30 flex flex-col p-compact-padding gap-2">
+<div class="flex justify-between items-center px-1">
+<h3 class="font-label-md text-label-md text-on-surface-variant flex items-center gap-1">
+<span class="material-symbols-outlined text-[14px]">architecture</span>
+                            SECTION A-A
+                        </h3>
+<button class="text-on-surface-variant hover:text-primary"><span class="material-symbols-outlined text-[16px]">fullscreen</span></button>
+</div>
+<div class="flex-1 bg-surface-container rounded border border-outline-variant/20 relative overflow-hidden">
+<!-- Blueprint grid -->
+<div class="absolute inset-0 bg-[linear-gradient(to_right,#42475415_1px,transparent_1px),linear-gradient(to_bottom,#42475415_1px,transparent_1px)] bg-[size:10px_10px] pointer-events-none"></div>
+<!-- 2D Drawing Image Placeholder -->
+<div class="absolute inset-0 w-full h-full bg-contain bg-center bg-no-repeat opacity-80" data-alt="A precise 2D technical sectional drawing of a concrete column with rebar detailing. The drawing features crisp, thin white lines against a dark slate background, typical of modern CAD software in dark mode. It includes meticulous dimension lines, text annotations calling out reinforcement bar diameters and spacing, all perfectly aligned and adhering strictly to an austere, professional architectural drafting style. Minimalist and purely functional.">
+</div>
+</div>
+</div>
+<!-- Quantity Takeoff Table -->
+<div class="w-3/5 flex flex-col p-compact-padding gap-2 overflow-hidden">
+<div class="flex justify-between items-center px-1">
+<h3 class="font-label-md text-label-md text-on-surface-variant flex items-center gap-1">
+<span class="material-symbols-outlined text-[14px]">table_chart</span>
+                            QUANTITY TAKEOFF
+                        </h3>
+<div class="flex gap-2">
+<button class="text-on-surface-variant hover:text-primary"><span class="material-symbols-outlined text-[16px]">filter_list</span></button>
+<button class="text-on-surface-variant hover:text-primary"><span class="material-symbols-outlined text-[16px]">download</span></button>
+</div>
+</div>
+<div class="flex-1 border border-outline-variant/20 rounded bg-surface-container overflow-auto">
+<table class="w-full text-left border-collapse whitespace-nowrap">
+<thead class="bg-surface-variant/50 sticky top-0 z-10 backdrop-blur-sm border-b border-outline-variant/30">
+<tr>
+<th class="p-2 px-3 font-label-sm text-label-sm text-on-surface-variant uppercase tracking-wider border-r border-outline-variant/10 w-8">#</th>
+<th class="p-2 px-3 font-label-sm text-label-sm text-on-surface-variant uppercase tracking-wider border-r border-outline-variant/10">Mark</th>
+<th class="p-2 px-3 font-label-sm text-label-sm text-on-surface-variant uppercase tracking-wider border-r border-outline-variant/10">Shape</th>
+<th class="p-2 px-3 font-label-sm text-label-sm text-on-surface-variant uppercase tracking-wider border-r border-outline-variant/10">Dia (mm)</th>
+<th class="p-2 px-3 font-label-sm text-label-sm text-on-surface-variant uppercase tracking-wider border-r border-outline-variant/10">L (mm)</th>
+<th class="p-2 px-3 font-label-sm text-label-sm text-on-surface-variant uppercase tracking-wider border-r border-outline-variant/10">Qty</th>
+<th class="p-2 px-3 font-label-sm text-label-sm text-on-surface-variant uppercase tracking-wider text-right">Mass (kg)</th>
+</tr>
+</thead>
+<tbody class="font-body-md text-body-md text-on-surface">
+<tr class="border-b border-outline-variant/10 hover:bg-surface-variant/30 cursor-pointer transition-colors">
+<td class="p-2 px-3 text-on-surface-variant border-r border-outline-variant/10">1</td>
+<td class="p-2 px-3 border-r border-outline-variant/10 font-medium">V-Main-01</td>
+<td class="p-2 px-3 border-r border-outline-variant/10"><span class="material-symbols-outlined text-[16px] text-primary">straight</span></td>
+<td class="p-2 px-3 border-r border-outline-variant/10">25</td>
+<td class="p-2 px-3 border-r border-outline-variant/10">4200</td>
+<td class="p-2 px-3 border-r border-outline-variant/10">12</td>
+<td class="p-2 px-3 text-right text-secondary">194.2</td>
+</tr>
+<tr class="border-b border-outline-variant/10 hover:bg-surface-variant/30 cursor-pointer transition-colors bg-surface-container-low/30">
+<td class="p-2 px-3 text-on-surface-variant border-r border-outline-variant/10">2</td>
+<td class="p-2 px-3 border-r border-outline-variant/10 font-medium">T-Tie-01</td>
+<td class="p-2 px-3 border-r border-outline-variant/10"><span class="material-symbols-outlined text-[16px] text-primary">crop_square</span></td>
+<td class="p-2 px-3 border-r border-outline-variant/10">10</td>
+<td class="p-2 px-3 border-r border-outline-variant/10">2400</td>
+<td class="p-2 px-3 border-r border-outline-variant/10">42</td>
+<td class="p-2 px-3 text-right text-secondary">62.1</td>
+</tr>
+<tr class="border-b border-outline-variant/10 hover:bg-surface-variant/30 cursor-pointer transition-colors">
+<td class="p-2 px-3 text-on-surface-variant border-r border-outline-variant/10">3</td>
+<td class="p-2 px-3 border-r border-outline-variant/10 font-medium">L-Dowel-01</td>
+<td class="p-2 px-3 border-r border-outline-variant/10"><span class="material-symbols-outlined text-[16px] text-primary">turn_right</span></td>
+<td class="p-2 px-3 border-r border-outline-variant/10">25</td>
+<td class="p-2 px-3 border-r border-outline-variant/10">1800</td>
+<td class="p-2 px-3 border-r border-outline-variant/10">12</td>
+<td class="p-2 px-3 text-right text-secondary">83.2</td>
+</tr>
+<tr class="border-b border-outline-variant/10 hover:bg-surface-variant/30 cursor-pointer transition-colors bg-surface-container-low/30 text-on-surface-variant">
+<td class="p-2 px-3 border-r border-outline-variant/10">4</td>
+<td class="p-2 px-3 border-r border-outline-variant/10">S-Spacer-01</td>
+<td class="p-2 px-3 border-r border-outline-variant/10"><span class="material-symbols-outlined text-[16px]">horizontal_rule</span></td>
+<td class="p-2 px-3 border-r border-outline-variant/10">8</td>
+<td class="p-2 px-3 border-r border-outline-variant/10">400</td>
+<td class="p-2 px-3 border-r border-outline-variant/10">24</td>
+<td class="p-2 px-3 text-right">3.8</td>
+</tr>
+</tbody>
+<tfoot class="bg-surface-container-high sticky bottom-0 border-t border-outline-variant/30">
+<tr>
+<td class="p-2 px-3 font-label-sm text-label-sm uppercase text-right tracking-wider text-on-surface-variant border-r border-outline-variant/10" colspan="6">Total Mass</td>
+<td class="p-2 px-3 font-label-md text-label-md text-right text-primary font-bold">343.3 kg</td>
+</tr>
+</tfoot>
+</table>
+</div>
+</div>
+</div>
+</main>
+<!-- Right SideNavBar (Inspector & Copilot) -->
+<aside class="fixed right-0 top-16 h-[calc(100vh-64px)] w-80 z-40 flex flex-col bg-surface-container-highest/60 dark:bg-surface-container-highest/60 backdrop-blur-md border-l border-outline-variant/20">
+<!-- Inspector Header -->
+<div class="px-gutter py-panel-gap border-b border-outline-variant/20 bg-surface-container-lowest/50">
+<h2 class="font-headline-md text-headline-md font-bold text-primary flex items-center gap-2">
+<span class="material-symbols-outlined text-[20px]">info</span>
+                    Inspector
+                </h2>
+<p class="font-label-md text-label-md text-on-surface-variant mt-1">Element Properties</p>
+</div>
+<!-- Parameters Content (Top Half) -->
+<div class="flex-1 flex flex-col overflow-hidden">
+<!-- Mini Tab Bar inside Inspector -->
+<div class="flex border-b border-outline-variant/20 px-2 pt-2">
+<button class="px-4 py-2 font-label-sm text-label-sm text-primary font-bold border-b-2 border-primary uppercase tracking-wider">Parameters</button>
+<button class="px-4 py-2 font-label-sm text-label-sm text-on-surface-variant hover:text-on-surface uppercase tracking-wider transition-colors">Material</button>
+</div>
+<div class="flex-1 overflow-y-auto p-gutter space-y-4">
+<!-- Property Group -->
+<div>
+<h4 class="font-label-sm text-label-sm text-on-surface-variant uppercase tracking-wider mb-2 flex items-center gap-1">
+<span class="material-symbols-outlined text-[14px]">straighten</span> Dimensions
+                        </h4>
+<div class="grid grid-cols-2 gap-px bg-outline-variant/20 border border-outline-variant/20 rounded overflow-hidden">
+<div class="bg-surface-container p-2 flex justify-between items-center">
+<span class="font-body-md text-body-md text-on-surface-variant">Width</span>
+<span class="font-body-md text-body-md text-on-surface">600 mm</span>
+</div>
+<div class="bg-surface-container p-2 flex justify-between items-center">
+<span class="font-body-md text-body-md text-on-surface-variant">Depth</span>
+<span class="font-body-md text-body-md text-on-surface">600 mm</span>
+</div>
+<div class="bg-surface-container p-2 flex justify-between items-center col-span-2">
+<span class="font-body-md text-body-md text-on-surface-variant">Clear Cover</span>
+<span class="font-body-md text-body-md text-on-surface">40 mm</span>
+</div>
+</div>
+</div>
+<!-- Property Group -->
+<div>
+<h4 class="font-label-sm text-label-sm text-on-surface-variant uppercase tracking-wider mb-2 flex items-center gap-1">
+<span class="material-symbols-outlined text-[14px]">grid_4x4</span> Reinforcement
+                        </h4>
+<div class="bg-surface-container border border-outline-variant/20 rounded p-2 space-y-2">
+<div class="flex justify-between items-center border-b border-outline-variant/10 pb-2">
+<span class="font-body-md text-body-md text-on-surface-variant">Main Bar Size</span>
+<select class="bg-surface-dim border border-outline-variant/30 rounded py-1 px-2 font-body-md text-body-md text-on-surface focus:border-primary focus:ring-0">
+<option>Ø20</option>
+<option selected="">Ø25</option>
+<option>Ø32</option>
+</select>
+</div>
+<div class="flex justify-between items-center">
+<span class="font-body-md text-body-md text-on-surface-variant">Tie Spacing</span>
+<div class="flex items-center gap-1">
+<input class="w-16 bg-surface-dim border border-outline-variant/30 rounded py-1 px-2 font-body-md text-body-md text-on-surface text-right focus:border-primary focus:ring-0" type="text" value="200"/>
+<span class="font-label-sm text-label-sm text-on-surface-variant">mm</span>
+</div>
+</div>
+</div>
+</div>
+</div>
+<!-- CTA -->
+<div class="p-gutter border-t border-outline-variant/20 bg-surface-container-lowest/50">
+<button class="w-full bg-primary hover:bg-primary/90 text-on-primary font-label-md text-label-md py-2 rounded transition-colors shadow-sm">
+                        Apply Changes
+                    </button>
+</div>
+</div>
+<!-- AI Copilot Interface (Bottom Half) -->
+<div class="h-1/3 min-h-[250px] border-t-2 border-outline-variant flex flex-col bg-surface-container-low">
+<!-- Header -->
+<div class="px-3 py-2 border-b border-outline-variant/20 bg-surface-container flex items-center justify-between">
+<h3 class="font-label-md text-label-md text-primary flex items-center gap-1.5">
+<span class="material-symbols-outlined text-[16px]" data-weight="fill" style="font-variation-settings: 'FILL' 1;">smart_toy</span>
+                        AI Structural Copilot
+                    </h3>
+<div class="w-2 h-2 rounded-full bg-primary animate-pulse" title="Online"></div>
+</div>
+<!-- Chat Area -->
+<div class="flex-1 overflow-y-auto p-3 flex flex-col gap-3 font-body-md text-body-md">
+<!-- System Message -->
+<div class="text-center font-label-sm text-label-sm text-outline uppercase tracking-wider mb-2">Session Started</div>
+<!-- AI Message -->
+<div class="flex gap-2 max-w-[90%]">
+<span class="material-symbols-outlined text-[16px] text-primary mt-0.5">smart_toy</span>
+<div class="bg-surface-container border border-outline-variant/30 rounded-r-lg rounded-bl-lg p-2 text-on-surface-variant text-[13px] leading-relaxed">
+                            Analyzing Column Col-A4. Current tie spacing (200mm) exceeds seismic code requirements for confinement zones. Recommend reducing to 100mm near joints.
+                        </div>
+</div>
+<!-- User Message -->
+<div class="flex gap-2 max-w-[90%] self-end">
+<div class="bg-primary-container/20 border border-primary/30 rounded-l-lg rounded-br-lg p-2 text-on-surface text-[13px] leading-relaxed">
+                            Apply recommended spacing to bottom 1m of column.
+                        </div>
+</div>
+</div>
+<!-- Input Area -->
+<div class="p-2 border-t border-outline-variant/20 bg-surface-container-lowest flex gap-2 items-center">
+<button class="text-on-surface-variant hover:text-primary transition-colors p-1"><span class="material-symbols-outlined text-[18px]">attachment</span></button>
+<input class="flex-1 bg-surface-dim border border-outline-variant/30 rounded-full py-1.5 px-3 font-body-md text-[13px] text-on-surface placeholder:text-outline focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-colors" placeholder="Ask Copilot..." type="text"/>
+<button class="text-primary hover:text-primary-fixed transition-colors p-1"><span class="material-symbols-outlined text-[18px]" data-weight="fill" style="font-variation-settings: 'FILL' 1;">send</span></button>
+</div>
+</div>
+</aside>
+</div>
+</body></html>
