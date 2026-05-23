@@ -68,43 +68,69 @@ export function getRebarRibTexture() {
   const ctx = canvas.getContext("2d");
   if (!ctx) throw new Error("Cannot create rebar rib texture context");
 
-  ctx.fillStyle = "#4f4f4f";
+  ctx.fillStyle = "#777777";
   ctx.fillRect(0, 0, 256, 256);
 
-  for (let y = -256; y < 512; y += 32) {
-    const gradient = ctx.createLinearGradient(0, y, 256, y + 44);
-    gradient.addColorStop(0, "#2f2f2f");
-    gradient.addColorStop(0.38, "#d0d0d0");
-    gradient.addColorStop(0.52, "#ffffff");
-    gradient.addColorStop(1, "#2f2f2f");
+  const base = ctx.getImageData(0, 0, 256, 256);
+  for (let i = 0; i < base.data.length; i += 4) {
+    const n = Math.random() * 28 - 14;
+    const v = THREE.MathUtils.clamp(112 + n, 0, 255);
+    base.data[i] = v;
+    base.data[i + 1] = v;
+    base.data[i + 2] = v;
+    base.data[i + 3] = 255;
+  }
+  ctx.putImageData(base, 0, 0);
+
+  ctx.globalCompositeOperation = "screen";
+  for (let y = -256; y < 512; y += 28) {
+    const gradient = ctx.createLinearGradient(0, y + 4, 256, y + 40);
+    gradient.addColorStop(0, "#101010");
+    gradient.addColorStop(0.42, "#b8b8b8");
+    gradient.addColorStop(0.5, "#f6f6f6");
+    gradient.addColorStop(0.58, "#b0b0b0");
+    gradient.addColorStop(1, "#101010");
     ctx.fillStyle = gradient;
     ctx.beginPath();
-    ctx.moveTo(0, y + 10);
-    ctx.quadraticCurveTo(70, y - 16, 128, y + 18);
-    ctx.quadraticCurveTo(186, y + 52, 256, y + 26);
-    ctx.lineTo(256, y + 40);
-    ctx.quadraticCurveTo(186, y + 66, 128, y + 32);
-    ctx.quadraticCurveTo(70, y - 2, 0, y + 24);
+    ctx.moveTo(-10, y + 20);
+    ctx.lineTo(112, y - 10);
+    ctx.lineTo(266, y + 32);
+    ctx.lineTo(266, y + 44);
+    ctx.lineTo(112, y + 2);
+    ctx.lineTo(-10, y + 32);
+    ctx.closePath();
+    ctx.fill();
+
+    ctx.beginPath();
+    ctx.moveTo(-10, y + 52);
+    ctx.lineTo(112, y + 82);
+    ctx.lineTo(266, y + 40);
+    ctx.lineTo(266, y + 52);
+    ctx.lineTo(112, y + 94);
+    ctx.lineTo(-10, y + 64);
     ctx.closePath();
     ctx.fill();
   }
 
-  ctx.globalAlpha = 0.65;
-  for (let x = 0; x < 256; x += 18) {
-    ctx.strokeStyle = x % 36 === 0 ? "#a6a6a6" : "#5c5c5c";
-    ctx.lineWidth = 2;
+  ctx.globalCompositeOperation = "multiply";
+  ctx.globalAlpha = 0.45;
+  for (let x = 0; x < 256; x += 32) {
+    ctx.strokeStyle = "#343434";
+    ctx.lineWidth = 3;
     ctx.beginPath();
     ctx.moveTo(x, 0);
-    ctx.lineTo(x + 28, 256);
+    ctx.lineTo(x + 18, 256);
     ctx.stroke();
   }
   ctx.globalAlpha = 1;
+  ctx.globalCompositeOperation = "source-over";
 
   rebarRibTexture = new THREE.CanvasTexture(canvas);
   rebarRibTexture.wrapS = THREE.RepeatWrapping;
   rebarRibTexture.wrapT = THREE.RepeatWrapping;
-  rebarRibTexture.repeat.set(1, 18);
+  rebarRibTexture.repeat.set(1.15, 10);
   rebarRibTexture.colorSpace = THREE.SRGBColorSpace;
+  rebarRibTexture.anisotropy = 8;
   rebarRibTexture.needsUpdate = true;
   return rebarRibTexture;
 }

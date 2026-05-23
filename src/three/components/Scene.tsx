@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useRef } from "react";
 import * as THREE from "three";
 import { Canvas, useThree } from "@react-three/fiber";
-import { OrbitControls, Environment, GizmoHelper, GizmoViewport, Grid } from "@react-three/drei";
+import { OrbitControls, GizmoHelper, GizmoViewport, Grid } from "@react-three/drei";
 import type { OrbitControls as OrbitControlsImpl } from "three-stdlib";
 import { useModelStore } from "@/store/useModelStore";
 import { useViewStore } from "@/store/useViewStore";
@@ -44,18 +44,23 @@ function CameraControls({ controlsRef }: { controlsRef: React.MutableRefObject<O
   const zin = useViewStore((s) => s.cameraZoomIn);
   const zout = useViewStore((s) => s.cameraZoomOut);
   const geometry = useModelStore((s) => s.geometry);
+  const geometryRef = useRef(geometry);
+
+  useEffect(() => {
+    geometryRef.current = geometry;
+  }, [geometry]);
 
   // Fit
   useEffect(() => {
     if (fit === 0) return;
-    const s = geometry.concrete.size;
+    const s = geometryRef.current.concrete.size;
     const max = Math.max(s.x, s.y, s.z) * 0.001; // 转 m
     const dist = max * 2.2 + 1;
     camera.position.set(dist, dist * 0.8, dist);
     camera.lookAt(0, 0, 0);
     controlsRef.current?.target.set(0, 0, 0);
     controlsRef.current?.update();
-  }, [fit, camera, geometry, controlsRef]);
+  }, [fit, camera, controlsRef]);
 
   // Zoom in/out via dolly
   useEffect(() => {
@@ -86,6 +91,11 @@ export function Scene({ onReady }: SceneProps) {
       gl={{ localClippingEnabled: true, preserveDrawingBuffer: true, antialias: true }}
       onCreated={({ gl, scene }) => {
         gl.localClippingEnabled = true;
+        gl.outputColorSpace = THREE.SRGBColorSpace;
+        gl.toneMapping = THREE.ACESFilmicToneMapping;
+        gl.toneMappingExposure = 1.12;
+        gl.shadowMap.enabled = true;
+        gl.shadowMap.type = THREE.PCFSoftShadowMap;
         if (!onceRef.current && onReady) {
           onceRef.current = true;
           onReady(gl, scene);
@@ -93,15 +103,17 @@ export function Scene({ onReady }: SceneProps) {
       }}
     >
       <color attach="background" args={["#051424"]} />
-      <ambientLight intensity={0.4} />
+      <ambientLight intensity={0.22} />
+      <hemisphereLight args={["#dbeafe", "#2f1d13", 0.5]} />
       <directionalLight
-        position={[8, 10, 6]}
-        intensity={1.2}
+        position={[7, 10, 5]}
+        intensity={1.45}
         castShadow
         shadow-mapSize-width={2048}
         shadow-mapSize-height={2048}
       />
-      <Environment preset="warehouse" />
+      <directionalLight position={[-6, 3, -8]} intensity={0.72} color="#8fb5ff" />
+      <directionalLight position={[0, -4, 7]} intensity={0.28} color="#ffb36b" />
       <Grid
         infiniteGrid
         cellSize={0.5}

@@ -49,14 +49,22 @@ function explodeOffset(role: RebarRole, explode: number): [number, number, numbe
   }
 }
 
+function polylineLength(rebar: RebarPolyline): number {
+  let total = 0;
+  for (let i = 1; i < rebar.points.length; i++) {
+    const a = rebar.points[i - 1];
+    const b = rebar.points[i];
+    total += Math.hypot(b.x - a.x, b.y - a.y, b.z - a.z);
+  }
+  return total;
+}
+
 interface Props {
   rebar: RebarPolyline;
   clippingPlanes: THREE.Plane[];
 }
 
 export function RebarTube({ rebar, clippingPlanes }: Props) {
-  const geometry = useMemo(() => buildRebarTubeGeometry(rebar), [rebar]);
-  const ribTexture = useMemo(() => getRebarRibTexture(), []);
   const explode = useViewStore((s) => s.explode);
   const selectedId = useViewStore((s) => s.selectedRebarId);
   const renderMode = useViewStore((s) => s.renderMode);
@@ -65,6 +73,24 @@ export function RebarTube({ rebar, clippingPlanes }: Props) {
   const isSelected = selectedId === rebar.id;
   const realistic = renderMode === "realistic";
   const color = isSelected ? "#fde047" : ROLE_COLORS[rebar.role];
+  const geometry = useMemo(
+    () => buildRebarTubeGeometry(rebar, realistic ? { radialSegments: 18, segmentLength: 28 } : undefined),
+    [rebar, realistic],
+  );
+  const ribTexture = useMemo(() => {
+    const texture = getRebarRibTexture().clone();
+    const repeatY = Math.max(4, Math.min(80, polylineLength(rebar) / Math.max(80, rebar.diameter * 7)));
+    texture.wrapS = THREE.RepeatWrapping;
+    texture.wrapT = THREE.RepeatWrapping;
+    texture.repeat.set(1.4, repeatY);
+    texture.needsUpdate = true;
+    return texture;
+  }, [rebar]);
+  const realisticColor = useMemo(() => {
+    const base = new THREE.Color(color);
+    const oxide = rebar.role.includes("箍筋") ? new THREE.Color("#7a3f16") : new THREE.Color("#4f1f18");
+    return realistic && !isSelected ? base.lerp(oxide, 0.42) : base;
+  }, [color, isSelected, realistic, rebar.role]);
 
   return (
     <mesh
@@ -78,14 +104,15 @@ export function RebarTube({ rebar, clippingPlanes }: Props) {
         setSelected(rebar.id);
       }}
     >
-      <meshStandardMaterial
+      <meshPhysicalMaterial
         key={renderMode}
-        color={realistic && !isSelected ? new THREE.Color(color).lerp(new THREE.Color("#5f1f14"), 0.25) : color}
-        map={realistic ? ribTexture : undefined}
+        color={realisticColor}
         bumpMap={realistic ? ribTexture : undefined}
-        bumpScale={realistic ? Math.max(0.08, rebar.diameter * 0.035) : 0}
-        metalness={realistic ? 0.65 : 0.95}
-        roughness={realistic ? 0.5 : 0.35}
+        bumpScale={realistic ? Math.max(0.18, rebar.diameter * 0.055) : 0}
+        metalness={realistic ? 0.82 : 0.95}
+        roughness={realistic ? 0.32 : 0.35}
+        clearcoat={realistic ? 0.18 : 0}
+        clearcoatRoughness={realistic ? 0.42 : 0}
         clippingPlanes={clippingPlanes}
         emissive={isSelected ? "#facc15" : "#000000"}
         emissiveIntensity={isSelected ? 0.4 : 0}

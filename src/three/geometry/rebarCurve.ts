@@ -97,18 +97,19 @@ export function buildRebarCurvePath(
  * 由 RebarPolyline 直接构造 TubeGeometry。
  * tubularSegments 按总长动态决定，约每 50mm 一个采样点，最少 16，最多 1024。
  */
-export function buildRebarTubeGeometry(polyline: RebarPolyline): THREE.TubeGeometry {
+export function buildRebarTubeGeometry(polyline: RebarPolyline, opts: { radialSegments?: number; segmentLength?: number } = {}): THREE.TubeGeometry {
   const { path, totalLength } = buildRebarCurvePath(polyline);
+  const { radialSegments = 12, segmentLength = 50 } = opts;
   const tubularSegments = Math.min(
     1024,
-    Math.max(16, Math.ceil(totalLength / 50))
+    Math.max(16, Math.ceil(totalLength / segmentLength))
   );
   // CurvePath 实现了 Curve 接口，可直接传入 TubeGeometry
   const geom = new THREE.TubeGeometry(
     path as unknown as THREE.Curve<THREE.Vector3>,
     tubularSegments,
     polyline.diameter / 2,
-    12,
+    radialSegments,
     false
   );
   return geom;
