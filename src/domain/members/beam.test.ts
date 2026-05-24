@@ -66,7 +66,7 @@ describe("梁 22G101 构造生成", () => {
 
     const points = stirrup!.points;
     const hookLen = Math.hypot(points[1].y - points[0].y, points[1].z - points[0].z);
-    const otherHookLen = Math.hypot(points[7].y - points[6].y, points[7].z - points[6].z);
+    const otherHookLen = Math.hypot(points[5].y - points[4].y, points[5].z - points[4].z);
     const bs = baseBeam.b - 2 * baseBeam.cover - baseBeam.stirrupDiameter;
     const hs = baseBeam.h - 2 * baseBeam.cover - baseBeam.stirrupDiameter;
 

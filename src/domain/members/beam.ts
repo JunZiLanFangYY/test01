@@ -79,22 +79,18 @@ function beamStirrupPoints(x: number, hs: number, bs: number, hookLen: number): 
   const yBot = -hs / 2;
   const zRight = bs / 2;
   const zLeft = -bs / 2;
-  // 弯钩沿 45° 方向斜向梁内，投影长度限制避免两侧弯钩相交
+  // 弯钩投影长度：135° 弯钩沿对角线方向斜向截面内，投影 = hookLen/√2
   const hookProj = Math.min(hookLen / Math.SQRT2, bs * 0.4, hs * 0.4);
-  // 弯钩 1：在顶边左侧区域，135° 折向右下（梁内）
-  const hook1Base = v(x, yTop, zLeft + hookProj);
-  const hook1End  = v(x, yTop - hookProj, zLeft + hookProj * 2);
-  // 弯钩 2：在顶边右侧区域，135° 折向左下（梁内）
-  const hook2Base = v(x, yTop, zRight - hookProj);
-  const hook2End  = v(x, yTop - hookProj, zRight - hookProj * 2);
+  // 弯钩 1：位于左上角，折向右下（截面内）
+  const hook1End = v(x, yTop - hookProj, zLeft + hookProj);
+  // 弯钩 2：位于右上角，折向左下（截面内）
+  const hook2End = v(x, yTop - hookProj, zRight - hookProj);
   return [
     hook1End,
-    hook1Base,
-    v(x, yTop, zLeft),    // 左上角（关键：原代码缺失此点导致箍筋顶部左侧缺口）
-    v(x, yBot, zLeft),
-    v(x, yBot, zRight),
-    v(x, yTop, zRight),
-    hook2Base,
+    v(x, yTop, zLeft),    // 左上角（弯钩 1 根部）
+    v(x, yBot, zLeft),    // 左下角
+    v(x, yBot, zRight),   // 右下角
+    v(x, yTop, zRight),   // 右上角（弯钩 2 根部）
     hook2End,
   ];
 }
