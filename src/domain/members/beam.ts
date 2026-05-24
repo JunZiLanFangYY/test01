@@ -46,6 +46,7 @@ export interface BeamParams {
   stirrupSpacingEnc: number;
   /** 非加密区间距 */
   stirrupSpacing: number;
+  stirrupLegs?: number;
   /** 腰筋（抗扭/构造）每侧根数，0 表示无 */
   sideBarMode: "auto" | "manual" | "none";
   sideBarCountPerSide: number;
@@ -78,20 +79,23 @@ function beamStirrupPoints(x: number, hs: number, bs: number, hookLen: number): 
   const yBot = -hs / 2;
   const zRight = bs / 2;
   const zLeft = -bs / 2;
-  const hookInset = Math.min(hookLen / Math.SQRT2, hs * 0.45, bs * 0.45);
-  const hookProjection = Math.min(hookLen / Math.SQRT2, hs - hookInset, bs - hookInset);
-  const topHookBase = v(x, yTop, zLeft + hookInset);
-  const sideHookBase = v(x, yTop - hookInset, zLeft);
-  const topHookEnd = v(x, yTop - hookProjection, zLeft + hookInset + hookProjection);
-  const sideHookEnd = v(x, yTop - hookInset - hookProjection, zLeft + hookProjection);
+  // 弯钩沿 45° 方向斜向梁内，投影长度限制避免两侧弯钩相交
+  const hookProj = Math.min(hookLen / Math.SQRT2, bs * 0.4, hs * 0.4);
+  // 弯钩 1：在顶边左侧区域，135° 折向右下（梁内）
+  const hook1Base = v(x, yTop, zLeft + hookProj);
+  const hook1End  = v(x, yTop - hookProj, zLeft + hookProj * 2);
+  // 弯钩 2：在顶边右侧区域，135° 折向左下（梁内）
+  const hook2Base = v(x, yTop, zRight - hookProj);
+  const hook2End  = v(x, yTop - hookProj, zRight - hookProj * 2);
   return [
-    topHookEnd,
-    topHookBase,
-    v(x, yTop, zRight),
-    v(x, yBot, zRight),
+    hook1End,
+    hook1Base,
+    v(x, yTop, zLeft),    // 左上角（关键：原代码缺失此点导致箍筋顶部左侧缺口）
     v(x, yBot, zLeft),
-    sideHookBase,
-    sideHookEnd,
+    v(x, yBot, zRight),
+    v(x, yTop, zRight),
+    hook2Base,
+    hook2End,
   ];
 }
 
@@ -269,6 +273,19 @@ export function buildBeam(p: BeamParams): MemberGeometry {
       points: beamStirrupPoints(x, hs, bs, hookLen),
       label: `箍筋 ${ds}`,
     });
+    const innerLegs = Math.max(0, (p.stirrupLegs ?? 2) - 2);
+    for (let leg = 1; leg <= innerLegs; leg++) {
+      const z = -bs / 2 + (leg * bs) / (innerLegs + 1);
+      rebars.push({
+        id: `beam-stir-${idx}-leg-${leg}`,
+        role: "梁箍筋",
+        diameter: ds,
+        grade: p.stirrupGrade,
+        bendDiameterFactor: factorS,
+        points: [v(x, hs / 2, z), v(x, -hs / 2, z)],
+        label: `箍筋内肢 ${ds}`,
+      });
+    }
   });
 
   return {
@@ -280,7 +297,7 @@ export function buildBeam(p: BeamParams): MemberGeometry {
       抗震等级: p.seismic,
       上部通长: `${p.topCount}Φ${dt}`,
       下部纵筋: `${p.bottomCount}Φ${db}`,
-      箍筋: `Φ${ds}@${p.stirrupSpacingEnc}/${p.stirrupSpacing}`,
+      箍筋: `Φ${ds}@${p.stirrupSpacingEnc}/${p.stirrupSpacing}（${p.stirrupLegs ?? 2}肢）`,
       加密区: `${encLen.toFixed(0)} mm`,
       腹板高度: `${webHeight.toFixed(0)} mm`,
       侧面构造筋: sideBarCount > 0 ? `每侧${sideBarCount}Φ${p.sideBarDiameter}` : "无",
