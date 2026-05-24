@@ -78,18 +78,18 @@ function beamStirrupPoints(x: number, hs: number, bs: number, hookLen: number): 
   const yBot = -hs / 2;
   const zRight = bs / 2;
   const zLeft = -bs / 2;
-  const hookOffset = Math.min(hookLen * 0.5, hs * 0.25, bs * 0.25);
-  const hookProjection = hookLen / Math.SQRT2;
-  const topHookBase = v(x, yTop, zRight - hookOffset);
-  const sideHookBase = v(x, yTop - hookOffset, zRight);
-  const topHookEnd = v(x, topHookBase.y - hookProjection, topHookBase.z - hookProjection);
-  const sideHookEnd = v(x, sideHookBase.y - hookProjection, sideHookBase.z - hookProjection);
+  const hookInset = Math.min(hookLen / Math.SQRT2, hs * 0.45, bs * 0.45);
+  const hookProjection = Math.min(hookLen / Math.SQRT2, hs - hookInset, bs - hookInset);
+  const topHookBase = v(x, yTop, zLeft + hookInset);
+  const sideHookBase = v(x, yTop - hookInset, zLeft);
+  const topHookEnd = v(x, yTop - hookProjection, zLeft + hookInset + hookProjection);
+  const sideHookEnd = v(x, yTop - hookInset - hookProjection, zLeft + hookProjection);
   return [
     topHookEnd,
     topHookBase,
-    v(x, yTop, zLeft),
-    v(x, yBot, zLeft),
+    v(x, yTop, zRight),
     v(x, yBot, zRight),
+    v(x, yBot, zLeft),
     sideHookBase,
     sideHookEnd,
   ];
@@ -244,16 +244,22 @@ export function buildBeam(p: BeamParams): MemberGeometry {
   const hs = h - 2 * cover - ds;
   const xList: number[] = [];
   const xStart = -halfL + 50; // 距支座 50mm 起箍
-  // 左加密
-  for (let x = xStart; x <= xStart + encLen + 1e-3; x += p.stirrupSpacingEnc) xList.push(x);
-  // 右加密
-  const rightEncStart = halfL - 50 - encLen;
-  for (let x = rightEncStart; x <= halfL - 50 + 1e-3; x += p.stirrupSpacingEnc) xList.push(x);
-  // 中间非加密
-  for (let x = xStart + encLen + p.stirrupSpacing; x < rightEncStart; x += p.stirrupSpacing) xList.push(x);
+  const xEnd = halfL - 50;
+  const rightEncStart = xEnd - encLen;
+  if (rightEncStart <= xStart + encLen) {
+    for (let x = xStart; x <= xEnd + 1e-3; x += p.stirrupSpacingEnc) xList.push(x);
+  } else {
+    // 左加密
+    for (let x = xStart; x <= xStart + encLen + 1e-3; x += p.stirrupSpacingEnc) xList.push(x);
+    // 右加密
+    for (let x = rightEncStart; x <= xEnd + 1e-3; x += p.stirrupSpacingEnc) xList.push(x);
+    // 中间非加密
+    for (let x = xStart + encLen + p.stirrupSpacing; x < rightEncStart; x += p.stirrupSpacing) xList.push(x);
+  }
   xList.sort((a, b2) => a - b2);
+  const stirrupXs = xList.filter((x, idx) => idx === 0 || x - xList[idx - 1] > 5);
 
-  xList.forEach((x, idx) => {
+  stirrupXs.forEach((x, idx) => {
     rebars.push({
       id: `beam-stir-${idx}`,
       role: "梁箍筋",

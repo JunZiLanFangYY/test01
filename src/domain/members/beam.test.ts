@@ -59,9 +59,38 @@ describe("梁 22G101 构造生成", () => {
     expect(geometry.meta.下部净距校核).toBe("满足 43≥25mm");
   });
 
+  it("梁箍筋 135° 弯钩平直段按 max(10d,75) 生成并位于截面内", () => {
+    const geometry = buildBeam(baseBeam);
+    const stirrup = geometry.rebars.find((r) => r.role === "梁箍筋");
+    expect(stirrup).toBeDefined();
+
+    const points = stirrup!.points;
+    const hookLen = Math.hypot(points[1].y - points[0].y, points[1].z - points[0].z);
+    const otherHookLen = Math.hypot(points[6].y - points[5].y, points[6].z - points[5].z);
+    const bs = baseBeam.b - 2 * baseBeam.cover - baseBeam.stirrupDiameter;
+    const hs = baseBeam.h - 2 * baseBeam.cover - baseBeam.stirrupDiameter;
+
+    expect(hookLen).toBeCloseTo(100);
+    expect(otherHookLen).toBeCloseTo(100);
+    for (const p of points) {
+      expect(p.y).toBeGreaterThanOrEqual(-hs / 2);
+      expect(p.y).toBeLessThanOrEqual(hs / 2);
+      expect(p.z).toBeGreaterThanOrEqual(-bs / 2);
+      expect(p.z).toBeLessThanOrEqual(bs / 2);
+    }
+  });
+
   it("纵筋过密时在元数据中提示净距不足", () => {
     const geometry = buildBeam({ ...baseBeam, b: 220, topCount: 5, bottomCount: 5 });
     expect(`${geometry.meta.上部净距校核}`).toContain("不足");
     expect(`${geometry.meta.下部净距校核}`).toContain("不足");
+  });
+
+  it("短梁两端加密区重叠时不重复生成同位置箍筋", () => {
+    const geometry = buildBeam({ ...baseBeam, Ln: 1800 });
+    const xs = geometry.rebars.filter((r) => r.role === "梁箍筋").map((r) => r.points[0].x);
+    const unique = xs.filter((x, idx) => idx === 0 || x - xs[idx - 1] > 5);
+
+    expect(xs).toHaveLength(unique.length);
   });
 });

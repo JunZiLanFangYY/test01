@@ -48,6 +48,28 @@ export interface ColumnParams {
 
 const v = (x: number, y: number, z: number): Vec3 => ({ x, y, z });
 
+function columnStirrupPoints(y: number, bs: number, hs: number, hookLen: number): Vec3[] {
+  const xLeft = -bs / 2;
+  const xRight = bs / 2;
+  const zBot = -hs / 2;
+  const zTop = hs / 2;
+  const hookInset = Math.min(hookLen / Math.SQRT2, bs * 0.45, hs * 0.45);
+  const hookProjection = Math.min(hookLen / Math.SQRT2, bs - hookInset, hs - hookInset);
+  const bottomHookBase = v(xLeft + hookInset, y, zBot);
+  const sideHookBase = v(xLeft, y, zBot + hookInset);
+  const bottomHookEnd = v(xLeft + hookInset + hookProjection, y, zBot + hookProjection);
+  const sideHookEnd = v(xLeft + hookProjection, y, zBot + hookInset + hookProjection);
+  return [
+    bottomHookEnd,
+    bottomHookBase,
+    v(xRight, y, zBot),
+    v(xRight, y, zTop),
+    v(xLeft, y, zTop),
+    sideHookBase,
+    sideHookEnd,
+  ];
+}
+
 export function buildColumn(p: ColumnParams): MemberGeometry {
   const { b, h, Hn, cover, longitudinalDiameter: dl, stirrupDiameter: ds } = p;
   // 纵筋中心到混凝土表面距离 = cover + ds + dl/2
@@ -138,30 +160,18 @@ export function buildColumn(p: ColumnParams): MemberGeometry {
   for (let y = yBot + enc.bottom + p.stirrupSpacing; y < topEncStart; y += p.stirrupSpacing) ys.push(y);
 
   ys.sort((a, b2) => a - b2);
+  const stirrupYs = ys.filter((y, idx) => idx === 0 || y - ys[idx - 1] > 5);
 
   // 单根矩形外箍：起点在某角，绕一圈回起点稍多一点，再加 135° 弯钩（沿对角线方向 hookLen）
   // 这里用折线近似 135° 弯钩：从角点沿对角线斜向上/向内 hookLen
-  ys.forEach((y, idx) => {
-    // 顶点（4 角）
-    const c1 = v(-bs / 2, y, -hs / 2);
-    const c2 = v(bs / 2, y, -hs / 2);
-    const c3 = v(bs / 2, y, hs / 2);
-    const c4 = v(-bs / 2, y, hs / 2);
-    // 135° 弯钩：从起点 c1 沿 (1, 0, 1)/√2 朝柱内方向 hookLen
-    const hookDir = { x: 1, z: 1 };
-    const norm = Math.SQRT2;
-    const hookEnd = v(
-      c1.x + (hookDir.x / norm) * hookLen,
-      y,
-      c1.z + (hookDir.z / norm) * hookLen
-    );
+  stirrupYs.forEach((y, idx) => {
     rebars.push({
       id: `col-stir-${idx}`,
       role: "柱箍筋",
       diameter: ds,
       grade: p.stirrupGrade,
       bendDiameterFactor: factorS,
-      points: [c1, c2, c3, c4, c1, hookEnd],
+      points: columnStirrupPoints(y, bs, hs, hookLen),
       label: `箍筋 ${ds}@${y < yBot + enc.bottom || y > topEncStart ? p.stirrupSpacingEnc : p.stirrupSpacing}`,
     });
   });
