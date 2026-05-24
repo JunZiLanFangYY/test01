@@ -79,18 +79,18 @@ function beamStirrupPoints(x: number, hs: number, bs: number, hookLen: number): 
   const yBot = -hs / 2;
   const zRight = bs / 2;
   const zLeft = -bs / 2;
-  // 两个 135° 弯钩均位于右上角，钩端沿 45° 斜向截面内，两端重叠
+  // 两个 135° 弯钩均位于右下角，斜向截面内叠合。
+  // 上侧两角保持纯直角，上部纵筋完整被矩形框箍住。
   const hookProj = Math.min(hookLen / Math.SQRT2, bs * 0.4, hs * 0.4);
-  const hookTip = v(x, yTop - hookProj, zRight - hookProj);
-  // 折线：钩端 → 右上角 → 顶边 → 左上角 → 左侧 → 左下角 → 底边 → 右下角 → 右侧 → 右上角 → 钩端
+  const hookTip = v(x, yBot + hookProj, zRight - hookProj);
   return [
     hookTip,
-    v(x, yTop, zRight),   // 右上角（弯钩根部）
-    v(x, yTop, zLeft),    // 左上角（顶边闭合）
+    v(x, yBot, zRight),   // 右下角（弯钩根部）
+    v(x, yTop, zRight),   // 右上角（直角，无弯钩干扰）
+    v(x, yTop, zLeft),    // 左上角（顶边完整）
     v(x, yBot, zLeft),    // 左下角
-    v(x, yBot, zRight),   // 右下角
-    v(x, yTop, zRight),   // 右上角（另一端弯钩根部）
-    hookTip,              // 钩端（与起点重叠，两钩在角部叠合）
+    v(x, yBot, zRight),   // 右下角（另一端弯钩根部）
+    hookTip,              // 钩端叠合
   ];
 }
 
